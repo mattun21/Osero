@@ -12,16 +12,14 @@ public class GameMove extends Frame implements MouseListener, WindowListener{
     private boolean wb = true;
 
     private int[][] BOARD = new int[][]
-        {{0,0,0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0,0,0},
-          {0,0,0,0,1,2,0,0,0,0},
-          {0,0,0,0,2,1,0,0,0,0},
-          {0,0,0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0,0,0}};
+        {{0,0,0,0,0,0,0,0},
+          {0,0,0,0,0,0,0,0},
+          {0,0,0,0,0,0,0,0},
+          {0,0,0,1,2,0,0,0},
+          {0,0,0,2,1,0,0,0},
+          {0,0,0,0,0,0,0,0},
+          {0,0,0,0,0,0,0,0},
+          {0,0,0,0,0,0,0,0}};
     private final int[][] dire = new int[][]
         {{ 1, 0},
           { 0, 1},
@@ -47,65 +45,24 @@ public class GameMove extends Frame implements MouseListener, WindowListener{
             for(int j = 0; j < MASU; j++) {
                 g.setColor(Color.BLACK);
                 g.drawRect((i*M_S)+8,(j*M_S)+31,M_S,M_S);
-                if (BOARD[i+1][j+1] == 0) {
+                if (BOARD[i][j] == 0) {
                     continue;
-                } else if (BOARD[i+1][j+1] == BLACK) {
+                } else if (BOARD[i][j] == BLACK) {
                     g.setColor(Color.BLACK);
-                } else if (BOARD[i+1][j+1] == WHITE){
+                } else if (BOARD[i][j] == WHITE){
                     g.setColor(Color.WHITE);
                 }
-                g.fillOval((i*M_S+3)+8,(j*M_S+3)+31,M_S-6,M_S-6);
+                g.fillOval((j*M_S+3)+8,(i*M_S+3)+31,M_S-6,M_S-6);
             }
         }
     }
     public void putStone(int x, int y) {
-        int stone;
-        int count = 1;
-        if(wb) {
-            stone = BLACK;
-        } else {
-            stone = WHITE;
-        }
-        if(BOARD[x][y] == 0) {
-            for(int i = 0; i < 8; i++) {
-                int a = x;
-                int b = y;
-                for(int j = 1; j < 8; j++) {
-                    if(a > 1 && a < 8 && b > 1 && b < 8) {
-                        a = a + dire[i][0];
-                        b = b + dire[i][1];
-                        BOARD[x][y] = stone;
-                        XY[j][0] = a;
-                        XY[j][1] = b;
-                        BXY[j] = BOARD[a][b];
-                        BXY[0] = BOARD[x][y];
-                        count = j;
-                        wb = !wb;
-                    }
-                }
-            }
-            change(XY,BXY, count, stone);
-        }
     }
-    public void change(int xy[][], int bxy[], int cou, int stone) {
-        boolean reverse = false;
-        for(int j = 1; j < cou; j++) {
-            if(bxy[j] == 0)  {
-                break;
-            } else if(bxy[j] == stone)  {
-                reverse = true;
-                cou = j;
-            }
-        }
-        for(int i = 1; i <= cou; i++) {
-            if(bxy[i] != 0 && reverse) { 
-                BOARD[xy[i][0]][xy[i][1]] = stone;
-            }
-        }
+    public void change() {
     }
     public void mouseClicked(MouseEvent e) {
-        int x = ((e.getX()-8)/M_S)+1;
-        int y = ((e.getY()-31)/M_S)+1;
+        int x = ((e.getX()-8)/M_S);
+        int y = ((e.getY()-31)/M_S);
         putStone(x, y);
         repaint();
     }
