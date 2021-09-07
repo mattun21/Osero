@@ -2,67 +2,98 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class GameMove extends Frame implements MouseListener, WindowListener{
+public class GameMove extends JPanel implements MouseListener {
     public static final int MASU = 8;
-    private static final int M_S = 60;
+    public static final int M_S = 60;
+    public static final int BLACK = 1;
+    public static final int WHITE = 2;
     private static final int WIDTH = M_S * MASU;
-    private static final int HEIGHT = WIDTH;
-    private static final int BLACK = 1;
-    private static final int WHITE = 2;
+    private static final int HEIGHT= M_S * MASU;
     private boolean wb = true;
 
-    private int[][] BOARD = new int[][]
-        {{0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0},
-          {0,0,0,1,2,0,0,0},
-          {0,0,0,2,1,0,0,0},
-          {0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0},
-          {0,0,0,0,0,0,0,0}};
-    private final int[][] dire = new int[][]
-        {{ 1, 0},
-          { 0, 1},
-          {-1, 0},
-          { 0,-1},
-          { 1, 1},
-          {-1,-1},
-          { 1,-1},
-          {-1,1}};
+    private int[][] BOARD = new int[][] {{0,0,0,0,0,0,0,0},
+                                                          {0,0,0,0,0,0,0,0},
+                                                          {0,0,0,0,0,0,0,0},
+                                                          {0,0,0,1,2,0,0,0},
+                                                          {0,0,0,2,1,0,0,0},
+                                                          {0,0,0,0,0,0,0,0},
+                                                          {0,0,0,0,0,0,0,0},
+                                                          {0,0,0,0,0,0,0,0}};
+
+    private final int[][] dire = new int[][] {{ 1, 0},{ 1,-1},{ 0,-1},{-1,-1},
+                                                            {-1, 0},{-1, 1},{ 0, 1},{ 1, 1}};
     private int[] BXY = new int[8];
     private int[][] XY = new int[8][2];
 
     public GameMove() {
-        setSize(WIDTH+17, HEIGHT+40);
+        setSize(WIDTH, HEIGHT);
         addMouseListener(this);
-        addWindowListener(this);
-        setVisible(true);
     }
     public void paint(Graphics g) {
-        g.setColor(new Color(34, 139,34));
-        g.fillRect(0,0,600,600);
+        g.setColor(new Color(34,139,34));
+        g.fillRect(1,1,WIDTH-1, HEIGHT-1);
         for(int i = 0; i < MASU; i++) {
             for(int j = 0; j < MASU; j++) {
                 g.setColor(Color.BLACK);
-                g.drawRect((i*M_S)+8,(j*M_S)+31,M_S,M_S);
-                if (BOARD[i][j] == 0) {
-                    continue;
-                } else if (BOARD[i][j] == BLACK) {
-                    g.setColor(Color.BLACK);
-                } else if (BOARD[i][j] == WHITE){
-                    g.setColor(Color.WHITE);
-                }
-                g.fillOval((j*M_S+3)+8,(i*M_S+3)+31,M_S-6,M_S-6);
+                g.drawRect((i*M_S),(j*M_S),M_S,M_S);
+                switch (BOARD[i][j]){
+                    case 1: g.setColor(Color.BLACK);      break;
+                    case 2: g.setColor(Color.WHITE);      break;
+                    case 0: continue;
+                } 
+                g.fillOval((j*M_S+3),(i*M_S+3),M_S-6,M_S-6);
             }
         }
     }
     public void putStone(int x, int y) {
+        int stone, a, b;
+        if(wb) {
+            stone = BLACK;
+        } else {
+            stone = WHITE;
+        }
+        for(int i = 0; i < 8;i++) {
+            a = x;    b = y;
+            for(int j = 0;j < 8; j++) {
+                a = a + dire[i][0];
+                b = b + dire[i][1];
+                if(a >=0 && a < 8 && b >=0 && b < 8) {
+                    BXY[j] = BOARD[b][a];
+                    XY[j][0] = a;    XY[j][1] = b;
+                }
+            }
+            change(BXY,XY,stone,x,y);
+            for(int j = 0; j<8; j++) {
+                XY[j][0] = 0;    XY[j][1] = 0;
+                BXY[j] = 0;
+            }
+        } 
+        turn(); 
     }
-    public void change() {
+    public void turn() {
+        wb = !wb;
+    }
+    public void change(int bxy[],int xy[][], int stone,int x, int y) {
+        int count= 0;
+        for(int i = 0; i < 8; i++) {
+            if(bxy[i]==stone) {
+                count = i;
+                break;
+            } else if(bxy[i]==0) {
+                count = 0;
+                break;
+            }
+        }
+        for(int i = 0; i < count; i++) {
+            if(bxy[i]!=0 && bxy[i]!=stone) {
+                BOARD[xy[i][1]][xy[i][0]] = stone;
+                BOARD[y][x] = stone; 
+            }
+        }
     }
     public void mouseClicked(MouseEvent e) {
-        int x = ((e.getX()-8)/M_S);
-        int y = ((e.getY()-31)/M_S);
+        int x = ((e.getX())/M_S);
+        int y = ((e.getY())/M_S);
         putStone(x, y);
         repaint();
     }
@@ -70,14 +101,4 @@ public class GameMove extends Frame implements MouseListener, WindowListener{
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {}
     public void mouseReleased(MouseEvent e) {}
-
-    public void windowClosing(WindowEvent e){
-         System.exit(0);
-    }
-    public void windowOpened(WindowEvent e){}
-    public void windowIconified(WindowEvent e){}
-    public void windowDeiconified(WindowEvent e){}
-    public void windowClosed(WindowEvent e){}
-    public void windowActivated(WindowEvent e){}
-    public void windowDeactivated(WindowEvent e){}
 }
